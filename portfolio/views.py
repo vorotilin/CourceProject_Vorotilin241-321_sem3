@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Project
 from .forms import ProjectForm
@@ -27,3 +27,14 @@ class ProjectCreateView(CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+
+class ProjectUpdateView(UpdateView):
+    model = Project
+    form_class = ProjectForm
+    template_name = 'portfolio/project_form.html'
+    success_url = reverse_lazy('portfolio:project_list')
+
+class ProjectDeleteView(DeleteView):
+    model = Project
+    template_name = 'portfolio/project_confirm_delete.html'
+    success_url = reverse_lazy('portfolio:project_list')

@@ -7,7 +7,11 @@
 </head>
 <body>
     <h1>{{ project.title }}</h1>
-    <p><a href="{% url 'portfolio:project_list' %}">Назад к списку</a></p>
+    <p>
+        <a href="{% url 'portfolio:project_list' %}">Назад к списку</a> |
+        <a href="{% url 'portfolio:project_edit' project.pk %}">Редактировать</a> |
+        <a href="{% url 'portfolio:project_delete' project.pk %}">Удалить</a>
+    </p>
 
     <h2>Информация о проекте</h2>
     <p><strong>Автор:</strong> {{ project.user.get_full_name }}</p>
