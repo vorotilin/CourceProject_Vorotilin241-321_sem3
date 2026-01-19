@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Все проекты</h1>
-    <p><a href="{% url 'portfolio:index' %}">На главную</a></p>
+    <p><a href="{% url 'portfolio:index' %}">На главную</a> | <a href="{% url 'portfolio:project_create' %}">Добавить проект</a></p>
 
     {% if projects %}
         <ul>
