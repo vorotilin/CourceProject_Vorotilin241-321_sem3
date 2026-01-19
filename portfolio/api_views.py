@@ -6,6 +6,7 @@ from .serializers import (
     ProjectSerializer, EventSerializer, CategorySerializer,
     SkillSerializer, EventTypeSerializer
 )
+from .filters import ProjectFilter, EventFilter
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -13,10 +14,22 @@ class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['category', 'user']
+    filterset_class = ProjectFilter
     search_fields = ['title', 'description']
     ordering_fields = ['created_at', 'updated_at', 'title']
     ordering = ['-created_at']
+
+    def get_queryset(self):
+        queryset = Project.objects.all()
+        category_id = self.kwargs.get('category_id')
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+
+        my_projects = self.request.query_params.get('my_projects', None)
+        if my_projects and self.request.user.is_authenticated:
+            queryset = queryset.filter(user=self.request.user)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -27,10 +40,22 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['event_type', 'user']
+    filterset_class = EventFilter
     search_fields = ['title', 'result']
     ordering_fields = ['created_at', 'updated_at', 'title']
     ordering = ['-created_at']
+
+    def get_queryset(self):
+        queryset = Event.objects.all()
+        event_type_id = self.kwargs.get('event_type_id')
+        if event_type_id:
+            queryset = queryset.filter(event_type_id=event_type_id)
+
+        my_events = self.request.query_params.get('my_events', None)
+        if my_events and self.request.user.is_authenticated:
+            queryset = queryset.filter(user=self.request.user)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

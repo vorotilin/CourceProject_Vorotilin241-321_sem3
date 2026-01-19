@@ -14,4 +14,6 @@ router.register(r'event-types', EventTypeViewSet, basename='eventtype')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('categories/<int:category_id>/projects/', ProjectViewSet.as_view({'get': 'list'}), name='projects-by-category'),
+    path('event-types/<int:event_type_id>/events/', EventViewSet.as_view({'get': 'list'}), name='events-by-type'),
 ]
