@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.title }}</title>
+</head>
+<body>
+    <h1>{{ project.title }}</h1>
+    <p><a href="{% url 'portfolio:project_list' %}">Назад к списку</a></p>
+
+    <h2>Информация о проекте</h2>
+    <p><strong>Автор:</strong> {{ project.user.get_full_name }}</p>
+    <p><strong>Категория:</strong> {{ project.category.name }}</p>
+    <p><strong>Описание:</strong></p>
+    <p>{{ project.description }}</p>
+
+    {% if project.cover_image %}
+        <p><strong>Обложка:</strong></p>
+        <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" style="max-width: 500px;">
+    {% endif %}
+
+    <h3>Навыки</h3>
+    {% if project.skills.all %}
+        <ul>
+        {% for skill in project.skills.all %}
+            <li>{{ skill.name }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Навыки не указаны.</p>
+    {% endif %}
+
+    <p><strong>Создан:</strong> {{ project.created_at|date:"d.m.Y H:i" }}</p>
+    <p><strong>Обновлен:</strong> {{ project.updated_at|date:"d.m.Y H:i" }}</p>
+</body>
+</html>

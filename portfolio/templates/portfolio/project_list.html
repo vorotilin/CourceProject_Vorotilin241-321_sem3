@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список проектов</title>
+</head>
+<body>
+    <h1>Все проекты</h1>
+    <p><a href="{% url 'portfolio:index' %}">На главную</a></p>
+
+    {% if projects %}
+        <ul>
+        {% for project in projects %}
+            <li>
+                <h2><a href="{% url 'portfolio:project_detail' project.pk %}">{{ project.title }}</a></h2>
+                <p>Автор: {{ project.user.get_full_name }}</p>
+                <p>Категория: {{ project.category.name }}</p>
+                <p>Создан: {{ project.created_at|date:"d.m.Y" }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Проектов пока нет.</p>
+    {% endif %}
+</body>
+</html>
