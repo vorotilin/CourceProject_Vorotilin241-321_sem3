@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import FileExtensionValidator
+from simple_history.models import HistoricalRecords
 
 
 class User(AbstractUser):
@@ -133,7 +134,8 @@ class Project(models.Model):
         auto_now=True,
         verbose_name='Дата изменения'
     )
-    
+    history = HistoricalRecords()
+
     class Meta:
         verbose_name = 'Проект'
         verbose_name_plural = 'Проекты'
@@ -142,7 +144,7 @@ class Project(models.Model):
             models.Index(fields=['-created_at']),
             models.Index(fields=['user', '-created_at']),
         ]
-    
+
     def __str__(self):
         return f"{self.title} ({self.user.get_full_name()})"
 
@@ -247,7 +249,8 @@ class Event(models.Model):
         auto_now=True,
         verbose_name='Дата изменения'
     )
-    
+    history = HistoricalRecords()
+
     class Meta:
         verbose_name = 'Участие в мероприятии'
         verbose_name_plural = 'Участия в мероприятиях'
@@ -256,7 +259,7 @@ class Event(models.Model):
             models.Index(fields=['-created_at']),
             models.Index(fields=['user', '-created_at']),
         ]
-    
+
     def __str__(self):
         return f"{self.title} - {self.user.get_full_name()}"
 

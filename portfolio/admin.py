@@ -2,7 +2,10 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
 from django.db.models import Count
+from import_export.admin import ImportExportModelAdmin
+from simple_history.admin import SimpleHistoryAdmin
 from .models import User, Category, Skill, Project, ProjectSkill, EventType, Event
+from .resources import ProjectResource, EventResource
 
 
 class ProjectSkillInline(admin.TabularInline):
@@ -122,7 +125,8 @@ class SkillAdmin(admin.ModelAdmin):
 
 
 @admin.register(Project)
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
+    resource_class = ProjectResource
     list_display = [
         'title',
         'user',
@@ -135,19 +139,15 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = ['category', 'created_at', 'updated_at']
     inlines = [ProjectSkillInline]
     date_hierarchy = 'created_at'
-    filter_horizontal = ['skills']
     list_display_links = ['title']
     raw_id_fields = ['user', 'category']
     readonly_fields = ['created_at', 'updated_at', 'get_cover_preview']
     search_fields = ['title', 'description', 'user__username', 'user__first_name', 'user__last_name']
+    history_list_display = ['title', 'category']
     
     fieldsets = (
         ('Основная информация', {
             'fields': ('user', 'title', 'category', 'description')
-        }),
-        ('Навыки', {
-            'fields': ('skills',),
-            'classes': ('collapse',)
         }),
         ('Изображение', {
             'fields': ('cover_image', 'get_cover_preview')
@@ -216,7 +216,8 @@ class EventTypeAdmin(admin.ModelAdmin):
 
 
 @admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
+class EventAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
+    resource_class = EventResource
     list_display = [
         'title',
         'user',
@@ -238,6 +239,7 @@ class EventAdmin(admin.ModelAdmin):
         'user__first_name',
         'user__last_name'
     ]
+    history_list_display = ['title', 'event_type', 'result']
     
     fieldsets = (
         ('Основная информация', {
