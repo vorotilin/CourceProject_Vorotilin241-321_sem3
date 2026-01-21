@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Портфолио студентов{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'portfolio/css/style.css' %}?v=2">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="{% url 'portfolio:index' %}" class="logo">Портфолио</a>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'portfolio:index' %}">Главная</a></li>
+                    <li><a href="{% url 'portfolio:project_list' %}">Проекты</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'portfolio:project_create' %}" class="btn btn-small">Добавить проект</a></li>
+                        <li><span class="user-info">{{ user.get_full_name }} ({{ user.get_role_display }})</span></li>
+                        <li><button class="btn btn-small btn-secondary" id="logoutBtn">Выход</button></li>
+                    {% else %}
+                        <li><button class="btn btn-small btn-secondary" id="loginBtn">Вход</button></li>
+                        <li><button class="btn btn-small" id="registerBtn">Регистрация</button></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Воротилин Илья, 241-321</p>
+    </footer>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h2>Вход в систему</h2>
+            <form id="loginForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="loginUsername">Логин</label>
+                    <input type="text" id="loginUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Пароль</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <div id="loginErrors" class="form-errors"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn">Войти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <h2>Регистрация</h2>
+            <form id="registerForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="regUsername">Логин</label>
+                    <input type="text" id="regUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="regFirstName">Имя</label>
+                    <input type="text" id="regFirstName" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regLastName">Фамилия</label>
+                    <input type="text" id="regLastName" name="last_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email</label>
+                    <input type="email" id="regEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="regRole">Роль</label>
+                    <select id="regRole" name="role" required>
+                        <option value="student">Студент</option>
+                        <option value="teacher">Преподаватель</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword1">Пароль</label>
+                    <input type="password" id="regPassword1" name="password1" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword2">Подтверждение пароля</label>
+                    <input type="password" id="regPassword2" name="password2" required>
+                </div>
+                <div id="registerErrors" class="form-errors"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn">Зарегистрироваться</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'portfolio/js/auth.js' %}"></script>
+</body>
+</html>

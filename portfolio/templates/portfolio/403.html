@@ -1,0 +1,18 @@
+{% extends 'portfolio/base.html' %}
+
+{% block title %}Доступ запрещен - Портфолио студентов{% endblock %}
+
+{% block content %}
+<div class="detail-section" style="text-align: center; padding: 6rem 2rem;">
+    <h1 style="font-size: 6rem; color: var(--error-color); margin-bottom: 2rem;">403</h1>
+    <h2 style="margin-bottom: 2rem;">Доступ запрещен</h2>
+    <p style="color: #999; font-size: 1.8rem; margin-bottom: 3rem;">
+        У вас нет прав для доступа к этой странице.<br>
+        Вы можете редактировать только свои собственные проекты.
+    </p>
+    <div class="actions" style="justify-content: center;">
+        <a href="{% url 'portfolio:project_list' %}" class="btn">← Вернуться к списку проектов</a>
+        <a href="{% url 'portfolio:index' %}" class="btn btn-secondary">На главную</a>
+    </div>
+</div>
+{% endblock %}

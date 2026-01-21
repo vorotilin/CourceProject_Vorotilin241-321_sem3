@@ -1,41 +1,75 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ project.title }}</title>
-</head>
-<body>
+{% extends 'portfolio/base.html' %}
+
+{% block title %}{{ project.title }} - Портфолио студентов{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'portfolio:index' %}">Главная</a>
+    <span>/</span>
+    <a href="{% url 'portfolio:project_list' %}">Проекты</a>
+    <span>/</span>
+    <span>{{ project.title }}</span>
+</div>
+
+<div class="page-header">
     <h1>{{ project.title }}</h1>
-    <p>
-        <a href="{% url 'portfolio:project_list' %}">Назад к списку</a> |
-        <a href="{% url 'portfolio:project_edit' project.pk %}">Редактировать</a> |
-        <a href="{% url 'portfolio:project_delete' project.pk %}">Удалить</a>
-    </p>
+    {% if user.is_authenticated and user == project.user %}
+        <div class="actions">
+            <a href="{% url 'portfolio:project_edit' project.pk %}" class="btn btn-secondary">Редактировать</a>
+            <a href="{% url 'portfolio:project_delete' project.pk %}" class="btn btn-delete">Удалить</a>
+        </div>
+    {% endif %}
+</div>
 
+{% if project.cover_image %}
+<div class="detail-section">
+    <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" class="detail-image">
+</div>
+{% endif %}
+
+<div class="detail-section">
     <h2>Информация о проекте</h2>
-    <p><strong>Автор:</strong> {{ project.user.get_full_name }}</p>
-    <p><strong>Категория:</strong> {{ project.category.name }}</p>
-    <p><strong>Описание:</strong></p>
-    <p>{{ project.description }}</p>
 
-    {% if project.cover_image %}
-        <p><strong>Обложка:</strong></p>
-        <img src="{{ project.cover_image.url }}" alt="{{ project.title }}" style="max-width: 500px;">
-    {% endif %}
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Автор</div>
+            <div class="info-value">{{ project.user.get_full_name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Категория</div>
+            <div class="info-value">{{ project.category.name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Дата создания</div>
+            <div class="info-value">{{ project.created_at|date:"d.m.Y H:i" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Последнее обновление</div>
+            <div class="info-value">{{ project.updated_at|date:"d.m.Y H:i" }}</div>
+        </div>
+    </div>
 
-    <h3>Навыки</h3>
+    <div style="margin-top: 3rem;">
+        <h3>Описание</h3>
+        <p style="color: #ccc; line-height: 1.8; margin-top: 1rem;">{{ project.description }}</p>
+    </div>
+</div>
+
+<div class="detail-section">
+    <h2>Используемые навыки и технологии</h2>
+
     {% if project.skills.all %}
-        <ul>
-        {% for skill in project.skills.all %}
-            <li>{{ skill.name }}</li>
-        {% endfor %}
-        </ul>
+        <div class="skills-list" style="margin-top: 1.5rem;">
+            {% for skill in project.skills.all %}
+                <span class="skill-tag">{{ skill.name }}</span>
+            {% endfor %}
+        </div>
     {% else %}
-        <p>Навыки не указаны.</p>
+        <p style="color: #999; margin-top: 1rem;">Навыки не указаны</p>
     {% endif %}
+</div>
 
-    <p><strong>Создан:</strong> {{ project.created_at|date:"d.m.Y H:i" }}</p>
-    <p><strong>Обновлен:</strong> {{ project.updated_at|date:"d.m.Y H:i" }}</p>
-</body>
-</html>
+<div class="actions">
+    <a href="{% url 'portfolio:project_list' %}" class="btn btn-secondary">← Назад к списку</a>
+</div>
+{% endblock %}

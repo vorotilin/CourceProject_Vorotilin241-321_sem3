@@ -1,0 +1,11 @@
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+venv/
+.env
+*.log
+.DS_Store
+.claude/
+DOCUMENTATION.md
+portfolio/nul

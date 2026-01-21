@@ -1,18 +1,41 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if object %}Редактировать проект{% else %}Добавить проект{% endif %}</title>
-</head>
-<body>
-    <h1>{% if object %}Редактировать проект{% else %}Добавить новый проект{% endif %}</h1>
-    <p><a href="{% url 'portfolio:project_list' %}">Назад к списку</a></p>
+{% extends 'portfolio/base.html' %}
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Сохранить</button>
-    </form>
-</body>
-</html>
+{% block title %}{% if object %}Редактировать проект{% else %}Создать проект{% endif %} - Портфолио студентов{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{% url 'portfolio:index' %}">Главная</a>
+    <span>/</span>
+    <a href="{% url 'portfolio:project_list' %}">Проекты</a>
+    <span>/</span>
+    <span>{% if object %}Редактирование{% else %}Создание{% endif %}</span>
+</div>
+
+<div class="page-header">
+    <h1>{% if object %}Редактировать проект{% else %}Создать новый проект{% endif %}</h1>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {% for field in form %}
+        <div class="form-group">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <span class="error-text">{{ error }}</span>
+                {% endfor %}
+            {% endif %}
+            {% if field.help_text %}
+                <small style="color: #999; display: block; margin-top: 0.5rem;">{{ field.help_text }}</small>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="form-actions">
+        <button type="submit" class="btn">Сохранить</button>
+        <a href="{% url 'portfolio:project_list' %}" class="btn btn-secondary">Отмена</a>
+    </div>
+</form>
+{% endblock %}

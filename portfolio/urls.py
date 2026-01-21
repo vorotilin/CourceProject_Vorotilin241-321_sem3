@@ -5,6 +5,9 @@ app_name = 'portfolio'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('auth/register/', views.register_user, name='register'),
+    path('auth/login/', views.login_user, name='login'),
+    path('auth/logout/', views.logout_user, name='logout'),
     path('projects/', views.ProjectListView.as_view(), name='project_list'),
     path('projects/create/', views.ProjectCreateView.as_view(), name='project_create'),
     path('projects/<int:pk>/', views.ProjectDetailView.as_view(), name='project_detail'),

@@ -1,5 +1,6 @@
 from django import forms
-from .models import Project
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .models import Project, User
 
 class ProjectForm(forms.ModelForm):
     class Meta:
@@ -9,3 +10,20 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
             'skills': forms.CheckboxSelectMultiple(),
         }
+
+class RegisterForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'role']
+        widgets = {
+            'username': forms.TextInput(attrs={'placeholder': 'Имя пользователя'}),
+            'first_name': forms.TextInput(attrs={'placeholder': 'Имя'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Фамилия'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Email'}),
+            'password1': forms.PasswordInput(attrs={'placeholder': 'Пароль'}),
+            'password2': forms.PasswordInput(attrs={'placeholder': 'Подтверждение пароля'}),
+        }
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Имя пользователя'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Пароль'}))
