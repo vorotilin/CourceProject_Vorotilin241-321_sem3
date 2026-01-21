@@ -5,6 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from .models import Project
 from .forms import ProjectForm
+from django.contrib.auth import get_user_model
+from django.db.models import Count
 
 def index(request):
     return render(request, 'portfolio/index.html')
@@ -64,3 +66,34 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Проект успешно удален!')
         return super().delete(request, *args, **kwargs)
+User = get_user_model()
+
+
+class AuthorListView(ListView):
+    model = User
+    template_name = 'portfolio/author_list.html'
+    context_object_name = 'authors'
+
+    def get_queryset(self):
+        return (
+            User.objects
+            .annotate(projects_count=Count('projects'))
+            .filter(projects_count__gt=0)
+            .order_by('-projects_count', 'last_name')
+        )
+class AuthorProjectListView(ListView):
+    model = Project
+    template_name = 'portfolio/project_list.html'
+    context_object_name = 'projects'
+
+    def get_queryset(self):
+        self.author = User.objects.get(pk=self.kwargs['author_id'])
+        return Project.objects.filter(user=self.author).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['author'] = self.author
+        context['is_author_page'] = True
+        return context
+    
+print("VIEWS LOADED")

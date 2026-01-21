@@ -10,10 +10,11 @@
 <body>
     <header>
         <div class="header-container">
-            <a href="{% url 'portfolio:index' %}" class="logo">Портфолио</a>
+            <a href="{% url 'portfolio:index' %}" class="logo">Витрина проектов</a>
             <nav>
                 <ul>
                     <li><a href="{% url 'portfolio:index' %}">Главная</a></li>
+                    <a href="{% url 'portfolio:author_list' %}">Список авторов</a>
                     <li><a href="{% url 'portfolio:project_list' %}">Проекты</a></li>
                     {% if user.is_authenticated %}
                         <li><a href="{% url 'portfolio:project_create' %}" class="btn btn-small">Добавить проект</a></li>

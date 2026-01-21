@@ -1,0 +1,46 @@
+{% extends 'portfolio/base.html' %}
+
+{% block title %}Авторы проектов{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Авторы</h1>
+</div>
+
+{% if authors %}
+    <div class="projects-grid">
+        {% for author in authors %}
+            <div class="project-card">
+                <div class="project-content">
+                    <h2 class="project-title">
+                        <a href="{% url 'portfolio:author_projects' author.id %}">
+                            {{ author.get_full_name }}
+                        </a>
+                    </h2>
+
+                    <div class="project-meta">
+                        <span>
+                            Проектов: {{ author.projects_count }}
+                        </span>
+                        <span>
+                            Роль: {{ author.get_role_display }}
+                        </span>
+                    </div>
+
+                    <div class="actions">
+                        <a href="{% url 'portfolio:author_projects' author.id %}"
+                           class="btn btn-small">
+                            Смотреть проекты
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <h2>Авторы не найдены</h2>
+        <p>В системе пока нет проектов</p>
+    </div>
+{% endif %}
+{% endblock %}

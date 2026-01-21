@@ -1,17 +1,32 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, get_user_model
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.db.models import Count
 import json
+
 from .models import Project
 from .forms import ProjectForm, RegisterForm, LoginForm
 
+
+User = get_user_model()
+
+
+# --------------------
+# Общие страницы
+# --------------------
+
 def index(request):
     return render(request, 'portfolio/index.html')
+
+
+# --------------------
+# Аутентификация
+# --------------------
 
 @require_http_methods(["POST"])
 def register_user(request):
@@ -32,23 +47,24 @@ def register_user(request):
                 }
             })
         else:
-            errors = {}
-            for field, error_list in form.errors.items():
-                errors[field] = [str(e) for e in error_list]
+            errors = {field: [str(e) for e in errs] for field, errs in form.errors.items()}
             return JsonResponse({'success': False, 'errors': errors}, status=400)
+
     except Exception as e:
         return JsonResponse({'success': False, 'errors': {'general': [str(e)]}}, status=500)
+
 
 @require_http_methods(["POST"])
 def login_user(request):
     try:
         data = json.loads(request.body)
-        username = data.get('username')
-        password = data.get('password')
+        user = authenticate(
+            request,
+            username=data.get('username'),
+            password=data.get('password')
+        )
 
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
+        if user:
             login(request, user)
             return JsonResponse({
                 'success': True,
@@ -59,18 +75,25 @@ def login_user(request):
                     'role': user.get_role_display()
                 }
             })
-        else:
-            return JsonResponse({
-                'success': False,
-                'errors': {'general': ['Неверное имя пользователя или пароль']}
-            }, status=400)
+
+        return JsonResponse({
+            'success': False,
+            'errors': {'general': ['Неверное имя пользователя или пароль']}
+        }, status=400)
+
     except Exception as e:
         return JsonResponse({'success': False, 'errors': {'general': [str(e)]}}, status=500)
+
 
 @require_http_methods(["POST"])
 def logout_user(request):
     logout(request)
     return JsonResponse({'success': True, 'message': 'Выход выполнен успешно!'})
+
+
+# --------------------
+# Проекты
+# --------------------
 
 class ProjectListView(ListView):
     model = Project
@@ -78,10 +101,12 @@ class ProjectListView(ListView):
     context_object_name = 'projects'
     ordering = ['-created_at']
 
+
 class ProjectDetailView(DetailView):
     model = Project
     template_name = 'portfolio/project_detail.html'
     context_object_name = 'project'
+
 
 class ProjectCreateView(LoginRequiredMixin, CreateView):
     model = Project
@@ -95,11 +120,6 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
         messages.success(self.request, 'Проект успешно создан!')
         return super().form_valid(form)
 
-    def form_invalid(self, form):
-        for field, errors in form.errors.items():
-            for error in errors:
-                messages.error(self.request, f'{field}: {error}')
-        return super().form_invalid(form)
 
 class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Project
@@ -109,18 +129,12 @@ class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     login_url = '/admin/login/'
 
     def test_func(self):
-        project = self.get_object()
-        return self.request.user == project.user
+        return self.request.user == self.get_object().user
 
     def form_valid(self, form):
-        messages.success(self.request, 'Проект успешно обновлен!')
+        messages.success(self.request, 'Проект успешно обновлён!')
         return super().form_valid(form)
 
-    def form_invalid(self, form):
-        for field, errors in form.errors.items():
-            for error in errors:
-                messages.error(self.request, f'{field}: {error}')
-        return super().form_invalid(form)
 
 class ProjectDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Project
@@ -129,9 +143,42 @@ class ProjectDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     login_url = '/admin/login/'
 
     def test_func(self):
-        project = self.get_object()
-        return self.request.user == project.user
+        return self.request.user == self.get_object().user
 
     def delete(self, request, *args, **kwargs):
-        messages.success(request, 'Проект успешно удален!')
+        messages.success(request, 'Проект успешно удалён!')
         return super().delete(request, *args, **kwargs)
+
+
+# --------------------
+# Авторы и их проекты
+# --------------------
+
+class AuthorListView(ListView):
+    model = User
+    template_name = 'portfolio/author_list.html'
+    context_object_name = 'authors'
+
+    def get_queryset(self):
+        return (
+            User.objects
+            .annotate(projects_count=Count('projects'))
+            .filter(projects_count__gt=0)
+            .order_by('-projects_count', 'last_name')
+        )
+
+
+class AuthorProjectListView(ListView):
+    model = Project
+    template_name = 'portfolio/project_list.html'
+    context_object_name = 'projects'
+
+    def get_queryset(self):
+        self.author = User.objects.get(pk=self.kwargs['author_id'])
+        return Project.objects.filter(user=self.author).order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['author'] = self.author
+        context['is_author_page'] = True
+        return context
