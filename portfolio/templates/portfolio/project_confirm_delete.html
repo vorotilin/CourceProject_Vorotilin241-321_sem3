@@ -27,7 +27,15 @@
             </svg>
             Внимание!
         </h3>
-        <p>Вы действительно хотите удалить проект "<strong>{{ project.title }}</strong>"?</p>
+        <p>
+            Вы действительно хотите удалить
+            <strong>
+            {% if object_type == "project" %} проект "{{ project.title }}"
+            {% else %}
+            событие "{{ event.title }}"
+            {% endif %}
+            </strong>?
+        </p>
         <p style="margin-top: 1rem; color: #999;">Это действие нельзя будет отменить.</p>
     </div>
 

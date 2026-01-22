@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import Project, User
+from .models import Project, Event, User
 
 class ProjectForm(forms.ModelForm):
     class Meta:
@@ -10,7 +10,15 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
             'skills': forms.CheckboxSelectMultiple(),
         }
-
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = [
+            'title',
+            'event_type',
+            'result',
+            'certificate_image',
+        ]
 class RegisterForm(UserCreationForm):
     class Meta:
         model = User

@@ -12,6 +12,29 @@
     {% endif %}
     </h1>
 </div>
+{% if user.is_authenticated %}
+    {% if not is_author_page %}
+        {# режим: все проекты — кнопки всегда #}
+        <div style="margin-bottom: 2rem;">
+            <a href="{% url 'portfolio:project_create' %}" class="btn">
+                Создать проект
+            </a>
+            <a href="{% url 'portfolio:event_create' %}" class="btn btn-secondary">
+                Создать событие
+            </a>
+        </div>
+    {% elif user == author %}
+        {# режим: проекты автора — только для владельца #}
+        <div style="margin-bottom: 2rem;">
+            <a href="{% url 'portfolio:project_create' %}" class="btn">
+                Создать проект
+            </a>
+            <a href="{% url 'portfolio:event_create' %}" class="btn btn-secondary">
+                Создать событие
+            </a>
+        </div>
+    {% endif %}
+{% endif %}
 
 {% if projects %}
     <div class="projects-grid">
@@ -88,8 +111,42 @@
 {% else %}
     <div class="empty-state">
         <h2>Проектов пока нет</h2>
-        <p style="color: #999; margin-bottom: 2rem;">Создайте первый проект, чтобы начать работу</p>
-        <a href="{% url 'portfolio:project_create' %}" class="btn">Создать первый проект</a>
     </div>
 {% endif %}
 {% endblock %}
+{% if events %}
+    <h2 style="margin-top:3rem;">События</h2>
+
+    <div class="projects-grid">
+        {% for event in events %}
+        <div class="project-card">
+            {% if event.certificate_image %}
+                <img src="{{ event.certificate_image.url }}" class="project-image">
+            {% endif %}
+
+            <div class="project-content">
+                <h2 class="project-title">{{ event.title }}</h2>
+
+                <div class="project-meta">
+                    <span>{{ event.event_type.name }}</span>
+                    <span>{{ event.created_at|date:"d.m.Y" }}</span>
+                </div>
+
+                <p class="project-description">
+                    {{ event.result|truncatewords:20 }}
+                </p>
+
+                {% if user == event.user %}
+                <div class="actions">
+                    <a href="{% url 'portfolio:event_edit' event.pk %}"
+                       class="btn btn-small btn-secondary">
+                        Редактировать
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+

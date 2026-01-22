@@ -1,18 +1,46 @@
 {% extends 'portfolio/base.html' %}
 
-{% block title %}{% if object %}Редактировать проект{% else %}Создать проект{% endif %} - Портфолио студентов{% endblock %}
+{% block title %}
+    {% if object %}
+        {% if is_event %}Редактирование события{% else %}Редактирование проекта{% endif %}
+    {% else %}
+        {% if is_event %}Создание события{% else %}Создание проекта{% endif %}
+    {% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="breadcrumb">
     <a href="{% url 'portfolio:index' %}">Главная</a>
     <span>/</span>
-    <a href="{% url 'portfolio:project_list' %}">Проекты</a>
+
+    {% if is_event %}
+        <a href="{% url 'portfolio:author_projects' user.id %}">События</a>
+    {% else %}
+        <a href="{% url 'portfolio:project_list' %}">Проекты</a>
+    {% endif %}
+
     <span>/</span>
-    <span>{% if object %}Редактирование{% else %}Создание{% endif %}</span>
+    <span>
+        {% if object %}Редактирование{% else %}Создание{% endif %}
+    </span>
 </div>
 
 <div class="page-header">
-    <h1>{% if object %}Редактировать проект{% else %}Создать новый проект{% endif %}</h1>
+    <h1>
+        {% if object %}
+            {% if is_event %}
+                Редактирование события
+            {% else %}
+                Редактирование проекта
+            {% endif %}
+        {% else %}
+            {% if is_event %}
+                Создание события
+            {% else %}
+                Создание проекта
+            {% endif %}
+        {% endif %}
+    </h1>
 </div>
 
 <form method="post" enctype="multipart/form-data">
@@ -22,20 +50,25 @@
         <div class="form-group">
             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
+
             {% if field.errors %}
                 {% for error in field.errors %}
                     <span class="error-text">{{ error }}</span>
                 {% endfor %}
             {% endif %}
+
             {% if field.help_text %}
-                <small style="color: #999; display: block; margin-top: 0.5rem;">{{ field.help_text }}</small>
+                <small class="help-text">{{ field.help_text }}</small>
             {% endif %}
         </div>
     {% endfor %}
 
     <div class="form-actions">
         <button type="submit" class="btn">Сохранить</button>
-        <a href="{% url 'portfolio:project_list' %}" class="btn btn-secondary">Отмена</a>
+
+        <a href="{% url 'portfolio:author_projects' user.id %}" class="btn btn-secondary">
+            Отмена
+        </a>
     </div>
 </form>
 {% endblock %}
