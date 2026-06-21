@@ -1,6 +1,13 @@
 from pathlib import Path
+import sentry_sdk
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+sentry_sdk.init(
+    dsn="",
+    traces_sample_rate=1.0,
+    send_default_pii=True,
+)
 
 SECRET_KEY = 'django-insecure-sh-wos$ui^h3x3l8z_*outty^y_)gue9an)rm0s(08+fdqs^33'
 

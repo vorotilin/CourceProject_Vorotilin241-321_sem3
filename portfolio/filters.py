@@ -1,4 +1,5 @@
 import django_filters
+from django.db.models import QuerySet
 from .models import Project, Event, Skill
 
 
@@ -29,7 +30,14 @@ class EventFilter(django_filters.FilterSet):
         model = Event
         fields = ['event_type', 'user', 'title', 'result']
 
-    def filter_has_certificate(self, queryset, name, value):
+    def filter_has_certificate(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
+        """
+        Фильтрует мероприятия по наличию сертификата.
+        Args:
+            queryset: Исходный queryset мероприятий
+            name: Имя поля фильтра
+            value: True — только с сертификатом, False — только без
+        """
         if value:
             return queryset.exclude(certificate_image='')
         return queryset.filter(certificate_image='')

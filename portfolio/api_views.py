@@ -2,8 +2,9 @@ from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.request import Request
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q, Count
+from django.db.models import Q, Count, QuerySet
 from django.utils import timezone
 from datetime import timedelta
 from .models import Project, Event, Category, Skill, EventType, User
@@ -25,7 +26,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at', 'title']
     ordering = ['-created_at']
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """
+        Возвращает queryset проектов с оптимизацией запросов.
+        Поддерживает фильтрацию по категории (из URL) и по текущему пользователю.
+        """
         queryset = Project.objects.select_related('user', 'category').prefetch_related('skills')
         category_id = self.kwargs.get('category_id')
         if category_id:
@@ -37,11 +42,22 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: ProjectSerializer) -> None:
+        """
+        Сохраняет проект, автоматически устанавливая текущего пользователя как автора.
+        Args:
+            serializer: Валидированный сериализатор проекта
+        """
         serializer.save(user=self.request.user)
 
     @action(methods=['GET'], detail=False)
-    def recent_or_updated(self, request):
+    def recent_or_updated(self, request: Request) -> Response:
+        """
+        Возвращает проекты текущего пользователя, созданные за последние 30 дней
+        или обновлённые за последние 7 дней.
+        Args:
+            request: HTTP-запрос
+        """
         thirty_days_ago = timezone.now() - timedelta(days=30)
         seven_days_ago = timezone.now() - timedelta(days=7)
 
@@ -54,7 +70,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(methods=['GET'], detail=False)
-    def search_complex(self, request):
+    def search_complex(self, request: Request) -> Response:
+        """
+        Сложный поиск проектов по title и description через Q-объекты.
+        Возвращает только проекты с указанной категорией (не null).
+        Args:
+            request: HTTP-запрос с обязательным параметром q
+        """
         query = request.query_params.get('q', '')
         if not query:
             return Response({'error': 'Query parameter q is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -68,7 +90,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(methods=['POST'], detail=True)
-    def add_skill(self, request, pk=None):
+    def add_skill(self, request: Request, pk: int = None) -> Response:
+        """
+        Добавляет навык к проекту по skill_id из тела запроса.
+        Args:
+            request: HTTP-запрос с полем skill_id
+            pk: ID проекта
+        """
         project = self.get_object()
         skill_id = request.data.get('skill_id')
 
@@ -83,7 +111,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Skill not found'}, status=status.HTTP_404_NOT_FOUND)
 
     @action(methods=['POST'], detail=True)
-    def remove_skill(self, request, pk=None):
+    def remove_skill(self, request: Request, pk: int = None) -> Response:
+        """
+        Удаляет навык у проекта по skill_id из тела запроса.
+        Args:
+            request: HTTP-запрос с полем skill_id
+            pk: ID проекта
+        """
         project = self.get_object()
         skill_id = request.data.get('skill_id')
 
@@ -108,7 +142,11 @@ class EventViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at', 'title']
     ordering = ['-created_at']
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """
+        Возвращает queryset мероприятий с оптимизацией запросов.
+        Поддерживает фильтрацию по типу мероприятия (из URL) и по текущему пользователю.
+        """
         queryset = Event.objects.select_related('user', 'event_type')
         event_type_id = self.kwargs.get('event_type_id')
         if event_type_id:
@@ -120,11 +158,22 @@ class EventViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: EventSerializer) -> None:
+        """
+        Сохраняет мероприятие, автоматически устанавливая текущего пользователя как автора.
+        Args:
+            serializer: Валидированный сериализатор мероприятия
+        """
         serializer.save(user=self.request.user)
 
     @action(methods=['GET'], detail=False)
-    def with_achievements(self, request):
+    def with_achievements(self, request: Request) -> Response:
+        """
+        Возвращает мероприятия за последний год, в которых есть сертификат
+        и результат содержит 'место' или 'диплом'.
+        Args:
+            request: HTTP-запрос
+        """
         one_year_ago = timezone.now() - timedelta(days=365)
 
         queryset = Event.objects.filter(
@@ -137,7 +186,13 @@ class EventViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(methods=['GET'], detail=False)
-    def recent_participations(self, request):
+    def recent_participations(self, request: Request) -> Response:
+        """
+        Возвращает мероприятия текущего пользователя с типом,
+        созданные или обновлённые за последние 30 дней.
+        Args:
+            request: HTTP-запрос
+        """
         thirty_days_ago = timezone.now() - timedelta(days=30)
 
         queryset = Event.objects.filter(
@@ -150,7 +205,13 @@ class EventViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(methods=['POST'], detail=True)
-    def update_result(self, request, pk=None):
+    def update_result(self, request: Request, pk: int = None) -> Response:
+        """
+        Обновляет поле result у мероприятия.
+        Args:
+            request: HTTP-запрос с обязательным полем result
+            pk: ID мероприятия
+        """
         event = self.get_object()
         new_result = request.data.get('result')
 
@@ -170,7 +231,10 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """
+        Возвращает queryset категорий с аннотацией projects_count.
+        """
         return Category.objects.annotate(projects_count=Count('projects'))
 
 
@@ -204,7 +268,10 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ['username', 'last_name', 'date_joined', 'projects_count']
     ordering = ['-date_joined']
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """
+        Возвращает queryset пользователей с аннотациями projects_count и events_count.
+        """
         return User.objects.annotate(
             projects_count=Count('projects', distinct=True),
             events_count=Count('events', distinct=True),
