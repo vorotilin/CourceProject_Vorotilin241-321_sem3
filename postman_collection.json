@@ -1,0 +1,559 @@
+{
+  "info": {
+    "_postman_id": "portfolio-students-api-v1",
+    "name": "Портфолио студентов — API",
+    "description": "REST API курсового проекта «Портфолио студентов». Группа 241-321, семестр 4.\n\nАутентификация: Basic Auth (username + password). Задать значения в переменных коллекции.\n\nBase URL: http://127.0.0.1:8000",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {"key": "username", "value": "{{username}}", "type": "string"},
+      {"key": "password", "value": "{{password}}", "type": "string"}
+    ]
+  },
+  "variable": [
+    {"key": "base_url",     "value": "http://127.0.0.1:8000", "type": "string"},
+    {"key": "username",     "value": "admin",                  "type": "string"},
+    {"key": "password",     "value": "admin",                  "type": "string"},
+    {"key": "project_id",   "value": "1",                      "type": "string"},
+    {"key": "event_id",     "value": "1",                      "type": "string"},
+    {"key": "user_id",      "value": "1",                      "type": "string"},
+    {"key": "category_id",  "value": "1",                      "type": "string"},
+    {"key": "skill_id",     "value": "1",                      "type": "string"},
+    {"key": "event_type_id","value": "1",                      "type": "string"}
+  ],
+  "item": [
+    {
+      "name": "Пользователи",
+      "item": [
+        {
+          "name": "Список пользователей",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/users/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", ""]
+            }
+          }
+        },
+        {
+          "name": "Пользователь по ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "{{user_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Поиск пользователей",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/users/?search=Илья",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", ""],
+              "query": [{"key": "search", "value": "Илья"}]
+            }
+          }
+        },
+        {
+          "name": "Пользователи по убыванию проектов",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/users/?ordering=-projects_count",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", ""],
+              "query": [{"key": "ordering", "value": "-projects_count"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Проекты",
+      "item": [
+        {
+          "name": "Список проектов",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/projects/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ""]
+            }
+          }
+        },
+        {
+          "name": "Проект по ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Создать проект",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept",       "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Мой новый проект\",\n  \"description\": \"Описание проекта\",\n  \"category_id\": 1,\n  \"skill_ids\": [1, 2]\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ""]
+            }
+          }
+        },
+        {
+          "name": "Обновить проект (частично)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Accept",       "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Обновлённое описание проекта\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Удалить проект",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Мои проекты",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/projects/?my_projects=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ""],
+              "query": [{"key": "my_projects", "value": "true"}]
+            }
+          }
+        },
+        {
+          "name": "Фильтр по категории",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/projects/?category={{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ""],
+              "query": [{"key": "category", "value": "{{category_id}}"}]
+            }
+          }
+        },
+        {
+          "name": "Поиск проектов",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/projects/?search=Django",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ""],
+              "query": [{"key": "search", "value": "Django"}]
+            }
+          }
+        },
+        {
+          "name": "Недавние / обновлённые проекты",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/projects/recent_or_updated/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "recent_or_updated", ""]
+            }
+          }
+        },
+        {
+          "name": "Сложный поиск (Q-объекты)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/projects/search_complex/?q=Django",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "search_complex", ""],
+              "query": [{"key": "q", "value": "Django"}]
+            }
+          }
+        },
+        {
+          "name": "Добавить навык к проекту",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept",       "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skill_id\": {{skill_id}}\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}/add_skill/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}", "add_skill", ""]
+            }
+          }
+        },
+        {
+          "name": "Удалить навык у проекта",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept",       "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skill_id\": {{skill_id}}\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/{{project_id}}/remove_skill/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", "{{project_id}}", "remove_skill", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Мероприятия",
+      "item": [
+        {
+          "name": "Список мероприятий",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/events/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", ""]
+            }
+          }
+        },
+        {
+          "name": "Мероприятие по ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/events/{{event_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "{{event_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Создать мероприятие",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept",       "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Олимпиада по программированию\",\n  \"event_type_id\": 1,\n  \"event_date\": \"2025-12-01\",\n  \"result\": \"1 место\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/events/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", ""]
+            }
+          }
+        },
+        {
+          "name": "Обновить мероприятие (частично)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Accept",       "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"result\": \"2 место\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/events/{{event_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "{{event_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Удалить мероприятие",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/events/{{event_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "{{event_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Мои мероприятия",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/events/?my_events=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", ""],
+              "query": [{"key": "my_events", "value": "true"}]
+            }
+          }
+        },
+        {
+          "name": "Мероприятия с достижениями",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/events/with_achievements/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "with_achievements", ""]
+            }
+          }
+        },
+        {
+          "name": "Недавние участия",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/events/recent_participations/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "recent_participations", ""]
+            }
+          }
+        },
+        {
+          "name": "Обновить результат мероприятия",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept",       "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"result\": \"Диплом 1 степени\"\n}",
+              "options": {"raw": {"language": "json"}}
+            },
+            "url": {
+              "raw": "{{base_url}}/api/events/{{event_id}}/update_result/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", "{{event_id}}", "update_result", ""]
+            }
+          }
+        },
+        {
+          "name": "Фильтр: только с сертификатом",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/events/?has_certificate=true",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", ""],
+              "query": [{"key": "has_certificate", "value": "true"}]
+            }
+          }
+        },
+        {
+          "name": "Фильтр по дате мероприятия",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/events/?event_date_after=2025-01-01&event_date_before=2025-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["api", "events", ""],
+              "query": [
+                {"key": "event_date_after",  "value": "2025-01-01"},
+                {"key": "event_date_before", "value": "2025-12-31"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Категории",
+      "item": [
+        {
+          "name": "Список категорий",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/categories/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", ""]
+            }
+          }
+        },
+        {
+          "name": "Категория по ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/categories/{{category_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "{{category_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Проекты по категории",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/categories/{{category_id}}/projects/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "categories", "{{category_id}}", "projects", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Навыки",
+      "item": [
+        {
+          "name": "Список навыков",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/skills/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "skills", ""]
+            }
+          }
+        },
+        {
+          "name": "Навык по ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/skills/{{skill_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "skills", "{{skill_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Поиск навыков",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/skills/?search=Python",
+              "host": ["{{base_url}}"],
+              "path": ["api", "skills", ""],
+              "query": [{"key": "search", "value": "Python"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Типы мероприятий",
+      "item": [
+        {
+          "name": "Список типов мероприятий",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/event-types/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-types", ""]
+            }
+          }
+        },
+        {
+          "name": "Тип мероприятия по ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/event-types/{{event_type_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-types", "{{event_type_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Мероприятия по типу",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/api/event-types/{{event_type_id}}/events/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "event-types", "{{event_type_id}}", "events", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
