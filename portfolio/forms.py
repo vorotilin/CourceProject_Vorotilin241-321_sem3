@@ -13,12 +13,10 @@ class ProjectForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = [
-            'title',
-            'event_type',
-            'result',
-            'certificate_image',
-        ]
+        fields = ['title', 'event_type', 'event_date', 'result', 'certificate_image']
+        widgets = {
+            'event_date': forms.DateInput(attrs={'type': 'date'}),
+        }
 class RegisterForm(UserCreationForm):
     class Meta:
         model = User

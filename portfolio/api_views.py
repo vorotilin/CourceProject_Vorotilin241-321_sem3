@@ -12,12 +12,13 @@ from .serializers import (
     SkillSerializer, EventTypeSerializer
 )
 from .filters import ProjectFilter, EventFilter
+from .permissions import IsOwnerOrAdmin
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
+    queryset = Project.objects.select_related('user', 'category').prefetch_related('skills')
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrAdmin]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = ProjectFilter
     search_fields = ['title', 'description']
@@ -25,7 +26,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        queryset = Project.objects.all()
+        queryset = Project.objects.select_related('user', 'category').prefetch_related('skills')
         category_id = self.kwargs.get('category_id')
         if category_id:
             queryset = queryset.filter(category_id=category_id)
@@ -98,9 +99,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 
 class EventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all()
+    queryset = Event.objects.select_related('user', 'event_type')
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrAdmin]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = EventFilter
     search_fields = ['title', 'result']
@@ -108,7 +109,7 @@ class EventViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        queryset = Event.objects.all()
+        queryset = Event.objects.select_related('user', 'event_type')
         event_type_id = self.kwargs.get('event_type_id')
         if event_type_id:
             queryset = queryset.filter(event_type_id=event_type_id)

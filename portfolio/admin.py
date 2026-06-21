@@ -30,7 +30,7 @@ class ProjectInline(admin.StackedInline):
 class EventInline(admin.TabularInline):
     model = Event
     extra = 0
-    fields = ['title', 'event_type', 'result', 'created_at']
+    fields = ['title', 'event_type', 'event_date', 'result', 'created_at']
     readonly_fields = ['created_at']
     show_change_link = True
     verbose_name = 'Мероприятие'
@@ -222,12 +222,12 @@ class EventAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
         'title',
         'user',
         'event_type',
+        'event_date',
         'result',
         'has_certificate',
         'created_at',
-        'updated_at'
     ]
-    list_filter = ['event_type', 'created_at', 'updated_at']
+    list_filter = ['event_type', 'event_date', 'created_at']
     date_hierarchy = 'created_at'
     list_display_links = ['title']
     raw_id_fields = ['user', 'event_type']
@@ -243,7 +243,7 @@ class EventAdmin(ImportExportModelAdmin, SimpleHistoryAdmin):
     
     fieldsets = (
         ('Основная информация', {
-            'fields': ('user', 'title', 'event_type', 'result')
+            'fields': ('user', 'title', 'event_type', 'event_date', 'result')
         }),
         ('Сертификат', {
             'fields': ('certificate_image', 'get_certificate_preview')

@@ -197,7 +197,6 @@ class AuthorEventListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # self.kwargs['user_id'] — получаем ID пользователя из URL
         user_id = self.kwargs.get('user_id')
         if user_id:
             try:
@@ -215,6 +214,7 @@ class AuthorListView(ListView):
     def get_queryset(self):
         return (
             User.objects
+            .prefetch_related('projects')
             .annotate(projects_count=Count('projects'))
             .filter(projects_count__gt=0)
             .order_by('-projects_count', 'last_name')
@@ -228,7 +228,13 @@ class AuthorProjectListView(ListView):
 
     def get_queryset(self):
         author_id = self.kwargs.get('author_id')
-        return Project.objects.filter(user_id=author_id).order_by('-created_at')
+        return (
+            Project.objects
+            .filter(user_id=author_id)
+            .select_related('user', 'category')
+            .prefetch_related('skills')
+            .order_by('-created_at')
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -1,0 +1,21 @@
+{% load rest_framework %}
+
+<div class="well" style="margin: 20px 0;">
+  <h4>Фильтры</h4>
+  <form action="" method="get" class="form-inline">
+    {% for field in filter.form %}
+      <div class="form-group" style="margin-right: 10px;">
+        <label for="{{ field.id_for_label }}" style="margin-right: 5px;">
+          {{ field.label }}
+        </label>
+        {{ field }}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary" style="margin-right: 5px;">
+      Применить
+    </button>
+    <a href="{{ request.path }}" class="btn btn-default">
+      Сбросить
+    </a>
+  </form>
+</div>

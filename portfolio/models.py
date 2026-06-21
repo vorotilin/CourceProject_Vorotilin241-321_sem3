@@ -228,6 +228,11 @@ class Event(models.Model):
         max_length=255,
         verbose_name='Название мероприятия'
     )
+    event_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name='Дата мероприятия'
+    )
     result = models.CharField(
         max_length=255,
         blank=True,

@@ -6,6 +6,16 @@ venv/
 .env
 *.log
 .DS_Store
+
+# Claude / AI
 .claude/
+memory/
+*claude*
+*Claude*
+
+# Docs (auto-generated / local only)
 DOCUMENTATION.md
+Documentation.md
+ArchiveDoc.md
+
 portfolio/nul

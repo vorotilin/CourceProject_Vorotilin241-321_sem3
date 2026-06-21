@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Project, Event, User, Category, Skill, EventType
 
 
@@ -63,15 +64,25 @@ class ProjectSerializer(serializers.ModelSerializer):
             'description': {'required': False, 'allow_blank': True},
         }
 
-    def get_skills_count(self, obj):
+    def get_skills_count(self, obj: Project) -> int:
+        """
+        Возвращает количество навыков проекта.
+        Args:
+            obj: Объект проекта
+        """
         return obj.skills.count()
 
-    def validate_title(self, value):
+    def validate_title(self, value: str) -> str:
+        """
+        Проверяет минимальную длину названия проекта.
+        Args:
+            value: Название проекта
+        """
         if len(value) < 3:
             raise serializers.ValidationError("Название проекта должно содержать минимум 3 символа.")
         return value
 
-    def validate(self, data):
+    def validate(self, data: dict) -> dict:
         user = self.context['request'].user
         title = data.get('title')
 
@@ -104,24 +115,47 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = [
             'id', 'user', 'event_type', 'event_type_id', 'title',
-            'result', 'certificate_image', 'has_certificate',
+            'event_date', 'result', 'certificate_image', 'has_certificate',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
         extra_kwargs = {
             'title': {'required': True, 'max_length': 255},
             'result': {'required': False, 'allow_blank': True},
+            'event_date': {'required': False, 'allow_null': True},
         }
 
-    def get_has_certificate(self, obj):
+    def get_has_certificate(self, obj: Event) -> bool:
+        """
+        Возвращает наличие сертификата у мероприятия.
+        Args:
+            obj: Объект мероприятия
+        """
         return obj.has_certificate()
 
-    def validate_title(self, value):
+    def validate_title(self, value: str) -> str:
+        """
+        Проверяет минимальную длину названия мероприятия.
+        Args:
+            value: Название мероприятия
+        """
         if len(value) < 3:
             raise serializers.ValidationError("Название мероприятия должно содержать минимум 3 символа.")
         return value
 
-    def validate(self, data):
+    def validate_event_date(self, value):
+        """
+        Проверяет что дата мероприятия не находится в будущем.
+        Args:
+            value: Дата мероприятия
+        """
+        if value and value > timezone.now().date():
+            raise serializers.ValidationError(
+                'Дата мероприятия не может быть в будущем.'
+            )
+        return value
+
+    def validate(self, data: dict) -> dict:
         result = data.get('result', '')
         certificate_image = data.get('certificate_image')
 
