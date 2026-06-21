@@ -10,11 +10,40 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
+class UserDetailSerializer(serializers.ModelSerializer):
+    """Сериализатор пользователя с аннотированными полями статистики."""
+
+    projects_count = serializers.IntegerField(read_only=True)
+    events_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'first_name', 'last_name', 'email',
+            'role', 'photo', 'is_active', 'date_joined',
+            'projects_count', 'events_count',
+        ]
+        read_only_fields = ['id', 'date_joined']
+
+
 class CategorySerializer(serializers.ModelSerializer):
+    projects_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'created_at']
+        fields = ['id', 'name', 'created_at', 'projects_count']
         read_only_fields = ['id', 'created_at']
+
+    def get_projects_count(self, obj: Category) -> int:
+        """
+        Возвращает количество проектов в категории.
+        Использует аннотацию из queryset, если доступна.
+        Args:
+            obj: Объект категории
+        """
+        if hasattr(obj, 'projects_count'):
+            return obj.projects_count
+        return obj.projects.count()
 
 
 class SkillSerializer(serializers.ModelSerializer):
@@ -50,12 +79,13 @@ class ProjectSerializer(serializers.ModelSerializer):
         source='skills'
     )
     skills_count = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
         fields = [
             'id', 'user', 'category', 'category_id', 'title', 'description',
-            'cover_image', 'skills', 'skill_ids', 'skills_count',
+            'cover_image', 'skills', 'skill_ids', 'skills_count', 'is_owner',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
@@ -71,6 +101,18 @@ class ProjectSerializer(serializers.ModelSerializer):
             obj: Объект проекта
         """
         return obj.skills.count()
+
+    def get_is_owner(self, obj: Project) -> bool:
+        """
+        Проверяет, является ли текущий пользователь автором проекта.
+        Использует request из контекста сериализатора.
+        Args:
+            obj: Объект проекта
+        """
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        return obj.user == request.user
 
     def validate_title(self, value: str) -> str:
         """
@@ -110,13 +152,14 @@ class EventSerializer(serializers.ModelSerializer):
         allow_null=True
     )
     has_certificate = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = [
             'id', 'user', 'event_type', 'event_type_id', 'title',
             'event_date', 'result', 'certificate_image', 'has_certificate',
-            'created_at', 'updated_at'
+            'is_owner', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
         extra_kwargs = {
@@ -132,6 +175,18 @@ class EventSerializer(serializers.ModelSerializer):
             obj: Объект мероприятия
         """
         return obj.has_certificate()
+
+    def get_is_owner(self, obj: Event) -> bool:
+        """
+        Проверяет, является ли текущий пользователь автором записи.
+        Использует request из контекста сериализатора.
+        Args:
+            obj: Объект мероприятия
+        """
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        return obj.user == request.user
 
     def validate_title(self, value: str) -> str:
         """

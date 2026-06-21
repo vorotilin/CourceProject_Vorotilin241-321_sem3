@@ -3,13 +3,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils import timezone
 from datetime import timedelta
-from .models import Project, Event, Category, Skill, EventType
+from .models import Project, Event, Category, Skill, EventType, User
 from .serializers import (
     ProjectSerializer, EventSerializer, CategorySerializer,
-    SkillSerializer, EventTypeSerializer
+    SkillSerializer, EventTypeSerializer, UserDetailSerializer
 )
 from .filters import ProjectFilter, EventFilter
 from .permissions import IsOwnerOrAdmin
@@ -163,12 +163,15 @@ class EventViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.annotate(projects_count=Count('projects'))
     serializer_class = CategorySerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name']
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
+
+    def get_queryset(self):
+        return Category.objects.annotate(projects_count=Count('projects'))
 
 
 class SkillViewSet(viewsets.ReadOnlyModelViewSet):
@@ -187,3 +190,22 @@ class EventTypeViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['name']
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.annotate(
+        projects_count=Count('projects', distinct=True),
+        events_count=Count('events', distinct=True),
+    )
+    serializer_class = UserDetailSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['username', 'first_name', 'last_name', 'email']
+    ordering_fields = ['username', 'last_name', 'date_joined', 'projects_count']
+    ordering = ['-date_joined']
+
+    def get_queryset(self):
+        return User.objects.annotate(
+            projects_count=Count('projects', distinct=True),
+            events_count=Count('events', distinct=True),
+        )

@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .api_views import (
     ProjectViewSet, EventViewSet, CategoryViewSet,
-    SkillViewSet, EventTypeViewSet
+    SkillViewSet, EventTypeViewSet, UserViewSet
 )
 
 router = DefaultRouter()
@@ -11,6 +11,7 @@ router.register(r'events', EventViewSet, basename='event')
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'skills', SkillViewSet, basename='skill')
 router.register(r'event-types', EventTypeViewSet, basename='eventtype')
+router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('', include(router.urls)),
