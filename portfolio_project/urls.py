@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('silk/', include('silk.urls', namespace='silk')),
     path('api/', include('portfolio.api_urls')),
     path('', include('portfolio.urls')),
 ]
