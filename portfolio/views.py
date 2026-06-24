@@ -109,6 +109,12 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
     form_class = ProjectForm
     template_name = 'portfolio/project_form.html'
 
+    def get_form_kwargs(self) -> dict:
+        """Передаёт текущего пользователя в форму для валидации уникальности title."""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def get_success_url(self) -> str:
         """
         Перенаправляет на страницу проектов текущего пользователя после создания.
@@ -141,6 +147,12 @@ class ProjectUpdateView(LoginRequiredMixin, UpdateView):
     model = Project
     form_class = ProjectForm
     template_name = 'portfolio/project_form.html'
+
+    def get_form_kwargs(self) -> dict:
+        """Передаёт текущего пользователя в форму для валидации уникальности title."""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_success_url(self) -> str:
         """

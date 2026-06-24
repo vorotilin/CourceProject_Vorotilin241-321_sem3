@@ -239,6 +239,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class SkillViewSet(viewsets.ReadOnlyModelViewSet):
+
     queryset = Skill.objects.all()
     serializer_class = SkillSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]

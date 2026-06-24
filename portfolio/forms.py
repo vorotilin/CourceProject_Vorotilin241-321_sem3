@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.utils import timezone
 from .models import Project, Event, User
 
 class ProjectForm(forms.ModelForm):
@@ -10,6 +11,29 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4}),
             'skills': forms.CheckboxSelectMultiple(),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_title(self):
+        value = self.cleaned_data.get('title', '')
+        if len(value) < 3:
+            raise forms.ValidationError('Название проекта должно содержать минимум 3 символа.')
+        return value
+
+    def clean(self):
+        cleaned = super().clean()
+        title = cleaned.get('title')
+        if title and self.user:
+            qs = Project.objects.filter(user=self.user, title=title)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                self.add_error('title', 'У вас уже есть проект с таким названием.')
+        return cleaned
+
+
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
@@ -17,6 +41,27 @@ class EventForm(forms.ModelForm):
         widgets = {
             'event_date': forms.DateInput(attrs={'type': 'date'}),
         }
+
+    def clean_title(self):
+        value = self.cleaned_data.get('title', '')
+        if len(value) < 3:
+            raise forms.ValidationError('Название мероприятия должно содержать минимум 3 символа.')
+        return value
+
+    def clean_event_date(self):
+        value = self.cleaned_data.get('event_date')
+        if value and value > timezone.now().date():
+            raise forms.ValidationError('Дата мероприятия не может быть в будущем.')
+        return value
+
+    def clean(self):
+        cleaned = super().clean()
+        result = cleaned.get('result')
+        certificate = cleaned.get('certificate_image')
+        existing_certificate = self.instance.certificate_image if self.instance and self.instance.pk else None
+        if not result and not certificate and not existing_certificate:
+            raise forms.ValidationError('Необходимо указать либо результат участия, либо загрузить сертификат.')
+        return cleaned
 class RegisterForm(UserCreationForm):
     class Meta:
         model = User
